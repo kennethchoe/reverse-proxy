@@ -1,0 +1,50 @@
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    ssl_certificate /etc/letsencrypt/live/your.domain1.name/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/your.domain1.name/privkey.pem;
+    ssl_stapling on;
+    ssl_stapling_verify on;
+    add_header Strict-Transport-Security "max-age=31536000";
+    access_log /var/log/nginx/sub.log combined;
+    server_name your.domain1.name;
+    location /.well-known {
+        alias /var/www/your.domain1.name/.well-known;
+    }
+    location / {
+        proxy_pass http://DOMAIN1-WEB-SERVER-INTERNAL-IP-ADDRESS:PORT;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    ssl_certificate /etc/letsencrypt/live/your.domain2.name/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/your.domain2.name/privkey.pem;
+    ssl_stapling on;
+    ssl_stapling_verify on;
+    add_header Strict-Transport-Security "max-age=31536000";
+    access_log /var/log/nginx/sub.log combined;
+    server_name your.domain2.name www.your.domain2.name;
+    location /.well-known {
+        alias /var/www/your.domain2.name/.well-known;
+    }
+    location / {
+        proxy_pass http://DOMAIN2-WEB-SERVER-INTERNAL-IP-ADDRESS:PORT;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    return 301 https://$host$request_uri;
+}
