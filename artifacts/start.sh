@@ -12,6 +12,12 @@ certbot --nginx -d your.domain2.name -d www.your.domain2.name -m your@email.com 
 nginx -s stop
 
 ###############
+# schedule renewal
+###############
+touch /var/log/cron.log
+crontab /artifacts/crons.cron && tail -f /var/log/cron.log &
+
+###############
 # switch to the real config
 ###############
 mv /artifacts/sites-available-default /etc/nginx/conf.d/default.conf
